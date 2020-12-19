@@ -18,6 +18,7 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 
+// foo will encode go structure into json
 func foo(w http.ResponseWriter, r *http.Request) {
 	p1 := person{
 		First: "John",
@@ -29,6 +30,13 @@ func foo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// bar will decode json into go structure
 func bar(w http.ResponseWriter, r *http.Request) {
+	var p1 person
+	err := json.NewDecoder(r.Body).Decode(&p1)
+	if err != nil {
+		log.Println("Decoded bad data:")
+	}
 
+	log.Println("Person:", p1)
 }
