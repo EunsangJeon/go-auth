@@ -3,6 +3,8 @@ package main
 import (
 	"crypto/hmac"
 	"crypto/sha512"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"log"
 
@@ -28,6 +30,18 @@ func main() {
 	}
 
 	log.Println("Logged in!")
+
+	testMsg := []byte("Hello, HMAC!")
+	log.Println("testMsg: ", base64.StdEncoding.EncodeToString(testMsg))
+	log.Println("testMsg: ", hex.EncodeToString(testMsg))
+	testMsgSig, err := signMessage(testMsg)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println("testMsg: ", base64.StdEncoding.EncodeToString(testMsg))
+	log.Println("testMsg: ", hex.EncodeToString(testMsg))
+	log.Println("testMsgSig: ", base64.StdEncoding.EncodeToString(testMsgSig))
+	log.Println("testMsg: ", hex.EncodeToString(testMsgSig))
 }
 
 func hashPassword(password string) ([]byte, error) {
