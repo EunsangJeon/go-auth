@@ -7,6 +7,10 @@ import (
 	"net/http"
 )
 
+type person struct {
+	First string
+}
+
 func jsonExample() {
 	p1 := person{
 		First: "John",
