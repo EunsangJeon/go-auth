@@ -1,3 +1,12 @@
+package main
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
+)
+
 // UserClaims is custom claim to make jwt
 type UserClaims struct {
 	jwt.StandardClaims
