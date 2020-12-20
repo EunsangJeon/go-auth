@@ -1,5 +1,7 @@
 package main
 
+import "github.com/EunsangJeon/go-auth/hmacauth"
+
 func main() {
-	// TODO
+	hmacauth.Server()
 }
