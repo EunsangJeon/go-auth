@@ -1,5 +1,7 @@
 package main
 
+import "github.com/EunsangJeon/go-auth/jwtauth"
+
 func main() {
-	// TODO
+	jwtauth.Server()
 }

@@ -15,6 +15,8 @@ type customClaims struct {
 	Email string `json:"email"`
 }
 
+var key = []byte("keyishere")
+
 // Server runs HMAC authentication demonstration server
 func Server() {
 	http.HandleFunc("/", foo)
@@ -26,8 +28,6 @@ func Server() {
 }
 
 func getJWT(msg string) (string, error) {
-	key := []byte("keyishere")
-
 	claims := customClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(10 * time.Second).Unix(),
@@ -77,11 +77,26 @@ func foo(w http.ResponseWriter, r *http.Request) {
 		c = &http.Cookie{}
 	}
 
-	isEqual := false
+	ss := c.Value
+	token, err := jwt.ParseWithClaims(
+		ss,
+		&customClaims{},
+		func(t *jwt.Token) (interface{}, error) {
+			if t.Method != jwt.SigningMethodHS256 {
+				return nil, fmt.Errorf("Cookie had not been signed with SHA256")
+			}
+
+			return key, nil
+		},
+	)
+
+	isValid := err == nil && token.Valid
 
 	message := "Not logged in"
-	if isEqual {
+	claims := &customClaims{}
+	if isValid {
 		message = "Logged in"
+		claims = token.Claims.(*customClaims)
 	}
 
 	html := `
@@ -96,6 +111,8 @@ func foo(w http.ResponseWriter, r *http.Request) {
 		<body>
 			<p>Cookie value: ` + c.Value + `</p>
 			<p>` + message + `</p>
+			<p>Session email: ` + claims.Email + `</p>
+			<p>Session expires at: ` + fmt.Sprint(claims.ExpiresAt) + `</p>
 			<form action="/submit" method="post">
 				<input type="email" name="email" />
 				<input type="submit" />
