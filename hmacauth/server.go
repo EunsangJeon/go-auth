@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
 // Server runs HMAC authentication demonstration server
@@ -53,6 +54,23 @@ func foo(w http.ResponseWriter, r *http.Request) {
 		c = &http.Cookie{}
 	}
 
+	isEqual := true
+
+	xs := strings.SplitN(c.Value, "|", 2)
+	if len(xs) == 2 {
+		cCode := xs[0]
+		cEmail := xs[1]
+
+		code := getCode(cEmail)
+
+		isEqual = hmac.Equal([]byte(cCode), []byte(code))
+	}
+
+	message := "Not logged in"
+	if isEqual {
+		message = "Logged in"
+	}
+
 	html := `
 		<!DOCTYPE html>
 		<html lang="en">
@@ -64,6 +82,7 @@ func foo(w http.ResponseWriter, r *http.Request) {
 		</head>
 		<body>
 			<p>Cookie value: ` + c.Value + `</p>
+			<p>` + message + `</p>
 			<form action="/submit" method="post">
 				<input type="email" name="email" />
 				<input type="submit" />
