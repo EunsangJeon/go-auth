@@ -17,7 +17,7 @@ type customClaims struct {
 
 var key = []byte("keyishere")
 
-// Server runs HMAC authentication demonstration server
+// Server runs JWT authentication demonstration server
 func Server() {
 	http.HandleFunc("/", foo)
 	http.HandleFunc("/submit", bar)
@@ -106,7 +106,7 @@ func foo(w http.ResponseWriter, r *http.Request) {
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<meta http-equiv="X-UA-Compatible" content="ie=edge">
-			<title>HMAC Example</title>
+			<title>JWT Example</title>
 		</head>
 		<body>
 			<p>Cookie value: ` + c.Value + `</p>

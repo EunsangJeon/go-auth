@@ -1,7 +1,9 @@
 package main
 
-import "github.com/EunsangJeon/go-auth/jwtauth"
+import (
+	"github.com/EunsangJeon/go-auth/oauth"
+)
 
 func main() {
-	jwtauth.Server()
+	oauth.Server()
 }
