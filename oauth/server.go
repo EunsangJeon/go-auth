@@ -1,15 +1,30 @@
 package oauth
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 )
+
+// In real world application, you will need DB of course
+// Key is github ID, value is user ID
+var githubConnections = make(map[string]string)
+
+// JSON layout: {"data":{"viewer":{"id":"..."}}}
+type githubResponse struct {
+	Data struct {
+		Viewer struct {
+			ID string `json:"id"`
+		} `json:"viewer"`
+	} `json:"data"`
+}
 
 var githubOauthConfig = &oauth2.Config{
 	Endpoint: github.Endpoint,
@@ -71,4 +86,35 @@ func completeGithubOauth(w http.ResponseWriter, r *http.Request) {
 
 	ts := githubOauthConfig.TokenSource(r.Context(), token)
 	client := oauth2.NewClient(r.Context(), ts)
+
+	// Github Oauth v4 uses GraphQL
+	requestBody := strings.NewReader(`{"query":"query {viewer {id}}"}`)
+	resp, err := client.Post("https://api.github.com/graphql", "application/json", requestBody)
+	if err != nil {
+		http.Error(w, "Could not get the user", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	var gr githubResponse
+	err = json.NewDecoder(resp.Body).Decode(&gr)
+	if err != nil {
+		http.Error(w, "Github invalid response", http.StatusInternalServerError)
+		return
+	}
+
+	githubID := gr.Data.Viewer.ID
+
+	userID, ok := githubConnections[githubID]
+	if !ok {
+		// New User - create account
+		// Maybe return, maybe not, depends
+		// For now I just input any value
+		userID = "testUser"
+		githubConnections[githubID] = userID
+
+	}
+	fmt.Printf("%s: %s\n", githubID, userID)
+
+	// Login to account userID using JWT
 }
